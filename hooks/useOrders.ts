@@ -31,13 +31,11 @@ export const useOrders = () => {
     try {
       const { error } = await supabase.from('orders').insert([
         {
-          id: order.id,
           customer: order.customer,
           items: order.items,
           total_price: order.totalPrice,        // ✅ snake_case
           payment_method: order.paymentMethod, // ✅ snake_case
           status: order.status,
-          created_at: order.created_at
         }
       ]);
 
