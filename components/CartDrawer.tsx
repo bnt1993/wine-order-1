@@ -46,15 +46,17 @@ const CartDrawer: React.FC<Props> = ({ isOpen, onClose, cart, updateQuantity, re
     else if (step === 'info') setStep('payment');
     else if (step === 'payment') {
       const orderId = `TH${Math.floor(Math.random()*90000 + 10000)}`;
-      const newOrder: Order = {
+      const newOrder = {
         id: orderId,
         customer: orderInfo,
         items: cart,
-        totalPrice: finalTotal,
-        paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'bank' ? 'BANK' : 'VISA',
+        total_price: finalTotal,
+        payment_method: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'bank' ? 'BANK' : 'VISA',
         status: 'pending',
-        createdAt: new Date().toISOString()
+        created_at: new Date().toISOString()
       };
+
+
       createOrder(newOrder);
       setLastOrderId(orderId);
       setStep('success');
