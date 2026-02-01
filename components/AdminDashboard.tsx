@@ -74,7 +74,7 @@ const AdminDashboard: React.FC<{
           ...existing,
           totalSpent: existing.totalSpent + o.totalPrice,
           orderCount: existing.orderCount + 1,
-          lastOrder: o.createdAt > existing.lastOrder ? o.createdAt : existing.lastOrder
+          lastOrder: o.created_at > existing.lastOrder ? o.created_at : existing.lastOrder
         });
       }
     });
@@ -282,7 +282,7 @@ const AdminDashboard: React.FC<{
                           }`}>
                             {order.status}
                           </div>
-                          <span className="text-stone-300 text-[10px] font-bold ml-auto">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
+                          <span className="text-stone-300 text-[10px] font-bold ml-auto">{new Date(order.created_at).toLocaleDateString('vi-VN')}</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                           <div>
