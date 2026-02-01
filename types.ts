@@ -32,7 +32,7 @@ export interface Order {
   totalPrice: number;
   paymentMethod: string;
   status: OrderStatus;
-  createdAt: string;
+  create_at: string;
 }
 
 export interface ChatMessage {

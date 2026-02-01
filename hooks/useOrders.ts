@@ -14,7 +14,7 @@ export const useOrders = () => {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .order('createdAt', { ascending: false });
+        .order('create_at', { ascending: false });
 
       if (error) throw error;
       setOrders(data || []);
