@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  const { cart, addToCart, removeFromCart, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
+  const { cart, addToCart, removeFromCart, updateQuantity, totalItems, total_price, clearCart } = useCart();
   const { products, loading: productsLoading } = useProducts();
   
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -355,7 +355,7 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} totalPrice={totalPrice} clearCart={clearCart} />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} total_price={total_price} clearCart={clearCart} />
       <ProductDetailModal isOpen={isDetailOpen} product={selectedProduct} onClose={() => setIsDetailOpen(false)} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
       <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} activeCategory={activeCategory} setActiveCategory={setActiveCategory} priceRange={priceRange} setPriceRange={setPriceRange} categories={categories} priceRanges={priceRanges} resetFilters={resetFilters} totalResults={filteredProducts.length} />
     </div>

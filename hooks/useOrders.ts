@@ -33,7 +33,7 @@ export const useOrders = () => {
         {
           customer: order.customer,
           items: order.items,
-          total_price: order.totalPrice,        // ✅ snake_case
+          total_price: order.total_price,        // ✅ snake_case
           payment_method: order.paymentMethod, // ✅ snake_case
           status: order.status,
         }

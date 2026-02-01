@@ -10,14 +10,14 @@ interface Props {
   cart: CartItem[];
   updateQuantity: (id: string, delta: number) => void;
   removeFromCart: (id: string) => void;
-  totalPrice: number;
+  total_price: number;
   clearCart: () => void;
 }
 
 type CheckoutStep = 'cart' | 'info' | 'payment' | 'success';
 type PaymentMethod = 'cod' | 'bank' | 'visa';
 
-const CartDrawer: React.FC<Props> = ({ isOpen, onClose, cart, updateQuantity, removeFromCart, totalPrice, clearCart }) => {
+const CartDrawer: React.FC<Props> = ({ isOpen, onClose, cart, updateQuantity, removeFromCart, total_price, clearCart }) => {
   const { createOrder } = useOrders();
   const [step, setStep] = useState<CheckoutStep>('cart');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
@@ -26,8 +26,8 @@ const CartDrawer: React.FC<Props> = ({ isOpen, onClose, cart, updateQuantity, re
   const [copied, setCopied] = useState(false);
   const [lastOrderId, setLastOrderId] = useState('');
   
-  const shippingFee = useMemo(() => (totalPrice >= 1500000 ? 0 : 35000), [totalPrice]);
-  const finalTotal = useMemo(() => totalPrice + shippingFee, [totalPrice, shippingFee]);
+  const shippingFee = useMemo(() => (total_price >= 1500000 ? 0 : 35000), [total_price]);
+  const finalTotal = useMemo(() => total_price + shippingFee, [total_price, shippingFee]);
 
   const bankAccount = {
     id: 'Sacombank',

@@ -52,7 +52,7 @@ const AdminDashboard: React.FC<{
   };
 
   const stats = useMemo(() => {
-    const totalRev = orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.totalPrice, 0);
+    const totalRev = orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.total_price, 0);
     const pendingOrders = orders.filter(o => o.status === 'pending').length;
     const totalCustomers = new Set(orders.map(o => o.customer.phone)).size;
     return { totalRev, pendingOrders, totalCustomers };
@@ -64,7 +64,7 @@ const AdminDashboard: React.FC<{
       if (!unique.has(o.customer.phone)) {
         unique.set(o.customer.phone, {
           ...o.customer,
-          totalSpent: o.totalPrice,
+          totalSpent: o.total_price,
           orderCount: 1,
           lastOrder: o.created_at
         });
@@ -72,7 +72,7 @@ const AdminDashboard: React.FC<{
         const existing = unique.get(o.customer.phone);
         unique.set(o.customer.phone, {
           ...existing,
-          totalSpent: existing.totalSpent + o.totalPrice,
+          totalSpent: existing.totalSpent + o.total_price,
           orderCount: existing.orderCount + 1,
           lastOrder: o.created_at > existing.lastOrder ? o.created_at : existing.lastOrder
         });
@@ -295,7 +295,7 @@ const AdminDashboard: React.FC<{
                           </div>
                           <div>
                             <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">Tổng tiền</p>
-                            <p className="text-xs font-black text-brand-primary">{formatCurrency(order.totalPrice)}</p>
+                            <p className="text-xs font-black text-brand-primary">{formatCurrency(order.total_price)}</p>
                           </div>
                           <div className="flex gap-2">
                              <a href={`tel:${order.customer.phone}`} className="p-2.5 bg-stone-50 rounded-xl text-brand-secondary hover:bg-brand-accent hover:text-white transition-all">

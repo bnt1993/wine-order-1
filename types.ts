@@ -29,7 +29,7 @@ export interface Order {
     note?: string;
   };
   items: CartItem[];
-  totalPrice: number;
+  total_price: number;
   paymentMethod: string;
   status: OrderStatus;
   create_at: string;
