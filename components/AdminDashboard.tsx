@@ -66,7 +66,7 @@ const AdminDashboard: React.FC<{
           ...o.customer,
           totalSpent: o.totalPrice,
           orderCount: 1,
-          lastOrder: o.createdAt
+          lastOrder: o.created_at
         });
       } else {
         const existing = unique.get(o.customer.phone);
