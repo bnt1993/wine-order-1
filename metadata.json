@@ -1,0 +1,8 @@
+{
+  "name": "Rượu Ngâm Thanh Hà - Tinh Hoa Thảo Dược Việt",
+  "description": "Website chuyên cung cấp các loại rượu ngâm dược liệu quý hiếm, bồi bổ sức khỏe và nâng tầm phong cách sống.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
