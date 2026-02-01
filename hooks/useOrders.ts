@@ -44,7 +44,7 @@ export const useOrders = () => {
           totalPrice: order.totalPrice,
           paymentMethod: order.paymentMethod,
           status: order.status,
-          createdAt: order.createdAt
+          created_at: order.created_at
         }
       ]);
       if (error) throw error;
