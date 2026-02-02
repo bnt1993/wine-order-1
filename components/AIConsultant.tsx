@@ -23,7 +23,11 @@ const AIConsultant: React.FC = () => {
 
     const userText = input.trim();
     setInput("");
-    const userMessage: ChatMessage = { role: "user", parts: [{ text: userText }] };
+
+    const userMessage: ChatMessage = {
+      role: "user",
+      parts: [{ text: userText }],
+    };
     setMessages((prev) => [...prev, userMessage]);
 
     setLoading(true);
@@ -40,7 +44,11 @@ const AIConsultant: React.FC = () => {
       const data = await response.json();
       const reply = data.reply || "Xin lỗi, tôi chưa thể trả lời lúc này.";
 
-      const modelMessage: ChatMessage = { role: "model", parts: [{ text: reply }] };
+      const modelMessage: ChatMessage = {
+        role: "model",
+        parts: [{ text: reply }],
+      };
+
       setMessages((prev) => [...prev, modelMessage]);
     } catch (error) {
       console.error("Proxy Error:", error);
@@ -65,9 +73,11 @@ const AIConsultant: React.FC = () => {
               Trợ Lý Thông Minh
             </span>
           </div>
+
           <h2 className="text-3xl sm:text-5xl font-serif font-black text-brand-secondary mb-4">
             Tư Vấn Sức Khỏe AI
           </h2>
+
           <p className="text-gray-500 text-xs sm:text-base max-w-2xl mx-auto font-medium">
             Chia sẻ tình trạng sức khỏe của bạn, chuyên gia AI của Thanh Hà sẽ gợi ý loại dược tửu phù hợp nhất.
           </p>
@@ -75,15 +85,18 @@ const AIConsultant: React.FC = () => {
 
         {/* Chat Box */}
         <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-brand-primary/5 overflow-hidden flex flex-col h-[500px] sm:h-[650px]">
+
           {/* Chat Header */}
           <div className="bg-brand-secondary p-4 sm:p-5 flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-accent rounded-2xl flex items-center justify-center shadow-lg rotate-3">
               <Bot className="text-brand-secondary w-6 h-6" />
             </div>
+
             <div>
               <p className="text-white text-sm sm:text-base font-black leading-none mb-1">
                 Thanh Hà Consultant
               </p>
+
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                 <p className="text-brand-accent text-[9px] font-black uppercase tracking-widest">
@@ -98,6 +111,7 @@ const AIConsultant: React.FC = () => {
             ref={scrollRef}
             className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6 bg-stone-50/50 no-scrollbar"
           >
+            {/* Empty state */}
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-6 animate-in fade-in duration-700">
                 <div className="p-6 bg-white rounded-3xl shadow-sm border border-stone-100">
@@ -106,6 +120,7 @@ const AIConsultant: React.FC = () => {
                     Chào bạn! Hãy hỏi tôi về các loại rượu dược liệu.
                   </p>
                 </div>
+
                 <div className="flex flex-col gap-2 w-full max-w-[280px]">
                   {["Đau lưng mỏi gối", "Rượu bổ thận xịn", "Giúp ngủ ngon hơn"].map((q) => (
                     <button
@@ -120,6 +135,7 @@ const AIConsultant: React.FC = () => {
               </div>
             )}
 
+            {/* Messages */}
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -144,6 +160,7 @@ const AIConsultant: React.FC = () => {
                       {msg.role === "user" ? "Bạn" : "Thanh Hà AI"}
                     </span>
                   </div>
+
                   <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium">
                     {msg.parts[0].text}
                   </p>
@@ -151,6 +168,7 @@ const AIConsultant: React.FC = () => {
               </div>
             ))}
 
+            {/* Loading Bubble */}
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 rounded-tl-none flex items-center gap-3">
@@ -174,6 +192,7 @@ const AIConsultant: React.FC = () => {
                 placeholder="Hỏi về sức khỏe của bạn..."
                 className="flex-1 bg-transparent px-4 py-3 text-sm font-bold focus:outline-none placeholder:text-stone-300"
               />
+
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
@@ -182,4 +201,11 @@ const AIConsultant: React.FC = () => {
                 <Send className="w-5 h-5" />
               </button>
             </div>
-          </
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default AIConsultant;
