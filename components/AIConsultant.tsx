@@ -179,4 +179,7 @@ const AIConsultant: React.FC = () => {
                 disabled={loading || !input.trim()}
                 className="bg-brand-secondary text-white p-3 rounded-xl hover:bg-brand-primary transition-all disabled:opacity-20 active:scale-90"
               >
-                <Send className="w-
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          </
