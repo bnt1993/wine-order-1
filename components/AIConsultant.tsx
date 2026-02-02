@@ -6,23 +6,50 @@ const AIConsultant: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [aiTyping, setAiTyping] = useState(""); // typing effect
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /* Smooth scroll */
+  const smartScroll = () => {
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: "smooth",
       });
-    }
-  }, [messages, loading]);
+    }, 100);
+  };
 
+  useEffect(smartScroll, [messages, loading, aiTyping]);
+
+  /* Typing Effect */
+  const typingEffect = async (text: string, callback: () => void) => {
+    setAiTyping("");
+    let i = 0;
+
+    const speed = 18; // tốc độ gõ
+
+    const typer = setInterval(() => {
+      setAiTyping((prev) => prev + text.charAt(i));
+      i++;
+      if (i >= text.length) {
+        clearInterval(typer);
+        callback();
+      }
+    }, speed);
+  };
+
+  /* Handle form */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
     const userText = input.trim();
     setInput("");
+
+    // Focus input lại
+    setTimeout(() => inputRef.current?.focus(), 200);
 
     const userMessage: ChatMessage = {
       role: "user",
@@ -31,32 +58,36 @@ const AIConsultant: React.FC = () => {
     setMessages((prev) => [...prev, userMessage]);
 
     setLoading(true);
+
     try {
       const response = await fetch("http://localhost:4000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          history: messages,
+          history: [...messages, userMessage], // lịch sử chuẩn
         }),
       });
 
       const data = await response.json();
       const reply = data.reply || "Xin lỗi, tôi chưa thể trả lời lúc này.";
 
-      const modelMessage: ChatMessage = {
-        role: "model",
-        parts: [{ text: reply }],
-      };
+      // Hiệu ứng gõ của AI
+      await typingEffect(reply, () => {
+        const doneMsg: ChatMessage = {
+          role: "model",
+          parts: [{ text: reply }],
+        };
 
-      setMessages((prev) => [...prev, modelMessage]);
-    } catch (error) {
-      console.error("Proxy Error:", error);
-      const errorMessage: ChatMessage = {
+        setMessages((prev) => [...prev, doneMsg]);
+        setAiTyping(""); // reset
+      });
+    } catch (err) {
+      const errorMsg: ChatMessage = {
         role: "model",
-        parts: [{ text: "Có lỗi kết nối tới máy chủ. Vui lòng thử lại sau." }],
+        parts: [{ text: "Lỗi kết nối server. Vui lòng thử lại." }],
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
@@ -65,8 +96,9 @@ const AIConsultant: React.FC = () => {
   return (
     <section id="consult" className="py-16 sm:py-24 bg-brand-light">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-10 sm:mb-12">
+        
+        {/* HEADER */}
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-accent/10 text-brand-accent rounded-full mb-4">
             <Sparkles className="w-3.5 h-3.5" />
             <span className="text-[10px] font-black uppercase tracking-widest">
@@ -78,27 +110,25 @@ const AIConsultant: React.FC = () => {
             Tư Vấn Sức Khỏe AI
           </h2>
 
-          <p className="text-gray-500 text-xs sm:text-base max-w-2xl mx-auto font-medium">
-            Chia sẻ tình trạng sức khỏe của bạn, chuyên gia AI của Thanh Hà sẽ gợi ý loại dược tửu phù hợp nhất.
+          <p className="text-gray-500 text-sm sm:text-base max-w-2xl mx-auto font-medium">
+            Chia sẻ tình trạng sức khỏe của bạn, AI của Thanh Hà sẽ đề xuất loại dược tửu phù hợp.
           </p>
         </div>
 
-        {/* Chat Box */}
-        <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-brand-primary/5 overflow-hidden flex flex-col h-[500px] sm:h-[650px]">
+        {/* CHAT BOX */}
+        <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-brand-primary/5 overflow-hidden flex flex-col h-[600px]">
 
-          {/* Chat Header */}
-          <div className="bg-brand-secondary p-4 sm:p-5 flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-accent rounded-2xl flex items-center justify-center shadow-lg rotate-3">
+          {/* HEADER CHAT */}
+          <div className="bg-brand-secondary p-5 flex items-center gap-3">
+            <div className="w-12 h-12 bg-brand-accent rounded-2xl flex items-center justify-center shadow-lg rotate-3">
               <Bot className="text-brand-secondary w-6 h-6" />
             </div>
-
             <div>
-              <p className="text-white text-sm sm:text-base font-black leading-none mb-1">
+              <p className="text-white font-black leading-none mb-1">
                 Thanh Hà Consultant
               </p>
-
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <p className="text-brand-accent text-[9px] font-black uppercase tracking-widest">
                   Sẵn sàng tư vấn
                 </p>
@@ -106,32 +136,18 @@ const AIConsultant: React.FC = () => {
             </div>
           </div>
 
-          {/* Chat Body */}
+          {/* CHAT BODY */}
           <div
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6 bg-stone-50/50 no-scrollbar"
+            className="flex-1 overflow-y-auto p-6 space-y-4 bg-stone-50/50 no-scrollbar"
           >
             {/* Empty state */}
             {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-6 animate-in fade-in duration-700">
-                <div className="p-6 bg-white rounded-3xl shadow-sm border border-stone-100">
-                  <Bot className="w-10 h-10 opacity-20 mb-3 mx-auto" />
-                  <p className="text-xs font-bold text-brand-secondary/40 max-w-[200px] mx-auto uppercase tracking-tighter">
-                    Chào bạn! Hãy hỏi tôi về các loại rượu dược liệu.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2 w-full max-w-[280px]">
-                  {["Đau lưng mỏi gối", "Rượu bổ thận xịn", "Giúp ngủ ngon hơn"].map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setInput(q)}
-                      className="text-[10px] font-black uppercase tracking-widest border border-stone-200 bg-white rounded-xl px-4 py-3 hover:bg-brand-accent hover:text-brand-secondary transition-all active:scale-95 shadow-sm"
-                    >
-                      "{q}"
-                    </button>
-                  ))}
-                </div>
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-6">
+                <Bot className="w-12 h-12 opacity-20" />
+                <p className="text-xs uppercase tracking-widest font-bold text-brand-secondary/50">
+                  Hãy bắt đầu cuộc trò chuyện...
+                </p>
               </div>
             )}
 
@@ -141,26 +157,15 @@ const AIConsultant: React.FC = () => {
                 key={i}
                 className={`flex ${
                   msg.role === "user" ? "justify-end" : "justify-start"
-                } animate-in slide-in-from-bottom-2 duration-300`}
+                }`}
               >
                 <div
-                  className={`max-w-[90%] sm:max-w-[80%] p-4 sm:p-5 rounded-2xl shadow-sm ${
+                  className={`max-w-[80%] p-4 rounded-2xl shadow-sm transition-all ${
                     msg.role === "user"
                       ? "bg-brand-secondary text-white rounded-tr-none"
-                      : "bg-white text-gray-800 border border-stone-100 rounded-tl-none"
+                      : "bg-white border border-stone-200 text-gray-800 rounded-tl-none"
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-2 opacity-40">
-                    {msg.role === "user" ? (
-                      <User className="w-3 h-3" />
-                    ) : (
-                      <Bot className="w-3 h-3 text-brand-accent" />
-                    )}
-                    <span className="text-[8px] font-black uppercase tracking-widest">
-                      {msg.role === "user" ? "Bạn" : "Thanh Hà AI"}
-                    </span>
-                  </div>
-
                   <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium">
                     {msg.parts[0].text}
                   </p>
@@ -168,41 +173,50 @@ const AIConsultant: React.FC = () => {
               </div>
             ))}
 
-            {/* Loading Bubble */}
-            {loading && (
+            {/* AI Typing Effect */}
+            {aiTyping && (
               <div className="flex justify-start">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 rounded-tl-none flex items-center gap-3">
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-bounce" />
-                    <div className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-bounce [animation-delay:0.2s]" />
-                    <div className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-bounce [animation-delay:0.4s]" />
-                  </div>
+                <div className="bg-white border border-stone-200 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700 animate-fade-in">
+                  {aiTyping}
+                </div>
+              </div>
+            )}
+
+            {/* Loading Indicator */}
+            {loading && !aiTyping && (
+              <div className="flex justify-start">
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 rounded-tl-none flex items-center gap-2">
+                  <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce delay-150" />
+                  <div className="w-2 h-2 bg-brand-accent rounded-full animate-bounce delay-300" />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Chat Input */}
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 bg-white border-t border-stone-100">
-            <div className="flex gap-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-200 focus-within:border-brand-accent transition-colors">
+          {/* INPUT */}
+          <form onSubmit={handleSubmit} className="p-6 bg-white border-t border-stone-200">
+            <div className="flex gap-2 bg-stone-50 p-2 rounded-2xl border border-stone-200">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Hỏi về sức khỏe của bạn..."
-                className="flex-1 bg-transparent px-4 py-3 text-sm font-bold focus:outline-none placeholder:text-stone-300"
+                className="flex-1 bg-transparent px-4 py-3 text-sm font-semibold focus:outline-none"
               />
 
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="bg-brand-secondary text-white p-3 rounded-xl hover:bg-brand-primary transition-all disabled:opacity-20 active:scale-90"
+                className="bg-brand-secondary text-white p-3 rounded-xl hover:bg-brand-primary active:scale-95 transition-all disabled:opacity-30"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
           </form>
         </div>
+
       </div>
     </section>
   );
