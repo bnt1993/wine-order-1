@@ -34,7 +34,7 @@ export const useOrders = () => {
           customer: order.customer,
           items: order.items,
           total_price: order.total_price,        // ✅ snake_case
-          payment_method: order.paymentMethod, // ✅ snake_case
+          payment_method: order.payment_method, // ✅ snake_case
           status: order.status,
         }
       ]);
