@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import JSZip from "jszip";
 import {
   X, Search, ShoppingCart, Users, Box, BarChart3, Phone, Trash2,
   ChevronRight, KeyRound, ShieldAlert, LayoutDashboard, DollarSign,
