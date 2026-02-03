@@ -24,7 +24,8 @@ const PAYMENT_LABEL: Record<string, string> = {
 };
 
 // ======================================================================
-// 🟦 SMALL COMPONENTS
+// 🟦 SMALL COMPONENTS (StatusBadge, StatusSelector, Info...)
+// — giữ nguyên không thay đổi
 // ======================================================================
 const StatusBadge = ({ status }: { status: OrderStatus }) => {
   const m = STATUS_META[status];
@@ -72,23 +73,6 @@ const StatusSelector = ({
   );
 };
 
-const OrderSkeleton = () => (
-  <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm animate-pulse">
-    <div className="flex items-center justify-between mb-4">
-      <div className="h-4 w-28 bg-stone-100 rounded" />
-      <div className="h-6 w-20 bg-stone-100 rounded" />
-    </div>
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="space-y-2">
-          <div className="h-3 w-20 bg-stone-100 rounded" />
-          <div className="h-4 w-32 bg-stone-100 rounded" />
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 const Info = ({
   label,
   value,
@@ -124,7 +108,7 @@ const Info = ({
 );
 
 // ======================================================================
-// 🟦 EXPORT CSV (no dependency)
+// 🟦 EXPORT CSV
 // ======================================================================
 type RowPrimitive = string | number | null | undefined;
 
@@ -187,10 +171,10 @@ export const exportOrdersToCSV = (orders: Order[]) => {
 };
 
 // ======================================================================
-// 🟦 EXPORT XLSX (NO XLSX LIB — 100% ZIP + XML)
+// 🟦 EXPORT XLSX — ĐÃ SỬA (dynamic import JSZip để fix lỗi Vercel)
 // ======================================================================
 export const exportOrdersToXLSX = async (orders: Order[]) => {
-  const JSZip = (await import("jszip")).default; // 👈 Lazy import — FIX Vercel
+  const JSZip = (await import("jszip")).default; // 👈 FIX VERCEL
 
   const { headers, rows } = makeOrderRows(orders);
 
@@ -221,22 +205,26 @@ export const exportOrdersToXLSX = async (orders: Order[]) => {
       <sheets>
         <sheet name="Orders" sheetId="1" r:id="rId1"/>
       </sheets>
-   .file(
-    "[Content_Types].xml",
-    `
-      <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-        <Default Extension="xml" ContentType="application/xml"/>
-        <Override PartName="/xl/workbook.xml"
+    </workbook>
+  `.trim();
+
+  const relsXML = `
+    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+      <Relationship Id="rId1" 
+        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"
+        Target="worksheets/sheet1.xml"/>
+    </Relationships>
+  `.trim();
+
+  const zip = new JSZip();
+  zip.file(
+   Default Extension="xml" ContentType="application/xml"/>
+        <Override PartName="/xl/workbook.xml" 
           ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-        <Override PartName="/xl/worksheets/sheet1.xml"
+        <Override PartName="/xl/worksheets/sheet1.xml" 
           ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
       </Types>
-    `.trim()
-  );
-
-  const xl = zip.folder("xl")!;
-  xl.file("workbook.xml", workbookXML);
-  xl.folder("_rels")!.file("workbook.xml.rels", relsXML);
+   book.xml.rels", relsXML);
   xl.folder("worksheets")!.file("sheet1.xml", sheetXML);
 
   const blob = await zip.generateAsync({ type: "blob" });
@@ -249,59 +237,6 @@ export const exportOrdersToXLSX = async (orders: Order[]) => {
   a.click();
   URL.revokeObjectURL(url);
 };
-
-// ======================================================================
-// 🟦 MOBILE BOTTOM TABS
-// ======================================================================
-const MobileBottomTabs = ({
-  active,
-  onChange,
-}: {
-  active: "stats" | "orders" | "products" | "customers";
-  onChange: (t: "stats" | "orders" | "products" | "customers") => void;
-}) => {
-  const tabs = [
-    { id: "stats", label: "Tổng quan", icon: BarChart3 },
-    { id: "orders", label: "Đơn hàng", icon: ShoppingCart },
-    { id: "products", label: "Sản phẩm", icon: Box },
-    { id: "customers", label: "Khách hàng", icon: Users },
-  ];
-
-  return (
-    <nav
-      className="
-        sm:hidden fixed left-0 right-0 bottom-0 z-[350]
-        bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70
-        border-t border-stone-200 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0)+10px)]
-      "
-    >
-      <ul className="grid grid-cols-4 gap-1">
-        {tabs.map((t) => {
-          const Icon = t.icon;
-          const isActive = active === t.id;
-          return (
-            <li key={t.id}>
-              <button
-                onClick={() => onChange(t.id as any)}
-                className={`w-full flex flex-col items-center justify-center gap-1 py-2 rounded-xl ${
-                  isActive
-                    ? "text-brand-secondary bg-stone-100"
-                    : "text-stone-500 active:bg-stone-50"
-                }`}
-              >
-                <Icon className={`w-5 h-5 ${isActive ? "text-brand-accent" : ""}`} />
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  {t.label}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
-};
-
 // ======================================================================
 // 🟦 ORDER CARD COMPONENT
 // ======================================================================
@@ -338,6 +273,7 @@ const OrderCard = ({
 
   return (
     <div className="bg-white p-5 sm:p-6 rounded-3xl border border-stone-100 shadow-sm">
+      {/* HEADER */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-black text-brand-primary truncate">
           #{order.id}
@@ -346,6 +282,9 @@ const OrderCard = ({
         <span className="ml-auto text-stone-400 text-[10px] font-bold">
           {new Date(order.created_at).toLocaleString("vi-VN", { hour12: false })}
         </span>
+      </div>
+
+      {/* INFO BLOCK */}
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Info label="Khách hàng" value={order.customer?.name || "—"} />
         <Info label="SĐT" value={order.customer?.phone || "—"} tel />
@@ -356,15 +295,20 @@ const OrderCard = ({
           emphasize
         />
       </div>
+
+      {/* 🟦 THÊM HIỂN THỊ SẢN PHẨM (NEW) */}
       <div className="mt-3">
         <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">
           Sản phẩm
         </p>
         <p className="text-xs font-black text-brand-secondary break-words">
-          {order.items.map(it => `${it.name} x${it.quantity}`).join(", ")}
+          {order.items
+            .map((it) => `${it.name} x${it.quantity}`)
+            .join(", ")}
         </p>
       </div>
 
+      {/* ADDRESS */}
       {order.customer?.address && (
         <div className="mt-3">
           <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">
@@ -376,6 +320,7 @@ const OrderCard = ({
         </div>
       )}
 
+      {/* STATUS + ACTIONS */}
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <StatusSelector value={localStatus} busy={busy} onChange={update} />
 
@@ -399,6 +344,7 @@ const OrderCard = ({
         </div>
       </div>
 
+      {/* TOGGLE DETAILS */}
       <button
         onClick={() => setOpen(!open)}
         className="mt-4 w-full flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-stone-500 hover:text-brand-secondary"
@@ -411,6 +357,7 @@ const OrderCard = ({
         />
       </button>
 
+      {/* DETAILS SECTION */}
       <div
         className={`overflow-hidden transition-all ${
           open ? "mt-2 max-h-[1000px]" : "max-h-0"
@@ -440,7 +387,6 @@ const OrderCard = ({
     </div>
   );
 };
-
 // ======================================================================
 // 🟦 MAIN ADMIN DASHBOARD
 // ======================================================================
@@ -465,13 +411,13 @@ const AdminDashboard = ({
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"stats" | "orders" | "products" | "customers">(
-    "stats"
-  );
+  const [activeTab, setActiveTab] =
+    useState<"stats" | "orders" | "products" | "customers">("stats");
+
   const [orderFilter, setOrderFilter] = useState<OrderStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 👉 Bộ lọc thời gian
+  // Date filters
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
@@ -500,7 +446,6 @@ const AdminDashboard = ({
         o.customer?.phone?.includes(q) ||
         o.id.toLowerCase().includes(q);
 
-      // Date range
       const created = new Date(o.created_at);
       if (fromDate && created < new Date(fromDate)) return false;
       if (toDate && created > new Date(toDate + "T23:59:59")) return false;
@@ -518,6 +463,7 @@ const AdminDashboard = ({
       .reduce((s, o) => s + o.total_price, 0);
 
     const pending = orders.filter((o) => o.status === "pending").length;
+
     const customers = new Set(
       orders.map((o) => o.customer?.phone).filter(Boolean)
     ).size;
@@ -629,7 +575,7 @@ const AdminDashboard = ({
 
       <div className="relative w-full max-w-7xl h-full sm:h-[95vh] bg-stone-50 rounded-none sm:rounded-[2rem] shadow-xl flex overflow-hidden">
 
-        {/* ================= SIDEBAR (desktop only) ================= */}
+        {/* ================= SIDEBAR ================= */}
         <aside className="hidden sm:flex sm:w-72 bg-white border-r border-stone-100 flex-col">
           <div className="p-8 border-b border-stone-100 flex items-center gap-3">
             <div className="w-12 h-12 bg-brand-primary text-white rounded-2xl flex items-center justify-center">
@@ -694,9 +640,7 @@ const AdminDashboard = ({
         {/* ================= MAIN CONTENT ================= */}
         <main className="flex-1 overflow-y-auto p-6 sm:p-10 pb-28 sm:pb-10 no-scrollbar">
 
-          {/* =============================================================
-             HEADER for Desktop Search 
-          ============================================================= */}
+          {/* HEADER */}
           <div className="hidden sm:flex justify-between items-center mb-8">
             <h2 className="text-sm font-black uppercase text-brand-secondary tracking-[0.2em]">
               {activeTab === "stats" && "Thống kê tổng quan"}
@@ -716,9 +660,7 @@ const AdminDashboard = ({
             </div>
           </div>
 
-          {/* =============================================================
-             TAB — STATS
-          ============================================================= */}
+          {/* ===================== TAB: STATS ======================= */}
           {activeTab === "stats" && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {[
@@ -777,13 +719,11 @@ const AdminDashboard = ({
             </div>
           )}
 
-          {/* =============================================================
-             TAB — ORDERS
-          ============================================================= */}
+          {/* ===================== TAB: ORDERS ======================= */}
           {activeTab === "orders" && (
             <div className="space-y-6">
 
-              {/* Mobile search */}
+              {/* Search mobile */}
               <div className="sm:hidden relative mb-3">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4" />
                 <input
@@ -794,10 +734,10 @@ const AdminDashboard = ({
                 />
               </div>
 
-              {/* Status filter chips */}
+              {/* Status filter */}
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                {(["all", "pending", "processing", "completed", "cancelled"] as const).map(
-                  (s) => (
+                {(["all", "pending", "processing", "completed", "cancelled"] as const)
+                 .map((s) => (
                     <button
                       key={s}
                       onClick={() => setOrderFilter(s)}
@@ -809,8 +749,7 @@ const AdminDashboard = ({
                     >
                       {s === "all" ? "Tất cả" : STATUS_META[s].label}
                     </button>
-                  )
-                )}
+                ))}
               </div>
 
               {/* Date filter */}
@@ -829,7 +768,7 @@ const AdminDashboard = ({
                 />
               </div>
 
-              {/* Export buttons */}
+              {/* Export */}
               <div className="flex justify-between items-center mt-4">
                 <p className="text-[11px] text-stone-500 font-black uppercase">
                   {filteredOrders.length} đơn phù hợp
@@ -843,6 +782,7 @@ const AdminDashboard = ({
                   >
                     CSV
                   </button>
+
                   <button
                     disabled={filteredOrders.length === 0}
                     onClick={() => exportOrdersToXLSX(filteredOrders)}
@@ -853,7 +793,7 @@ const AdminDashboard = ({
                 </div>
               </div>
 
-              {/* Orders list */}
+              {/* ORDERS LIST */}
               <div className="grid gap-4">
                 {loading ? (
                   <>
@@ -882,9 +822,7 @@ const AdminDashboard = ({
             </div>
           )}
 
-          {/* =============================================================
-             TAB — PRODUCTS
-          ============================================================= */}
+          {/* ===================== TAB: PRODUCTS ======================= */}
           {activeTab === "products" && (
             <div className="space-y-6">
               <p className="text-[11px] font-black text-stone-500 uppercase">
@@ -924,10 +862,13 @@ const AdminDashboard = ({
                             </span>
                           </div>
                         </td>
+
                         <td className="px-6 py-4 text-xs">{p.category}</td>
+
                         <td className="px-6 py-4 text-xs font-black text-brand-primary">
                           {formatCurrency(p.price)}
                         </td>
+
                         <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => {
@@ -949,9 +890,7 @@ const AdminDashboard = ({
             </div>
           )}
 
-          {/* =============================================================
-             TAB — CUSTOMERS
-          ============================================================= */}
+          {/* ===================== TAB: CUSTOMERS ======================= */}
           {activeTab === "customers" && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {customersGrouped.map((c, i) => (
@@ -995,10 +934,9 @@ const AdminDashboard = ({
             </div>
           )}
         </main>
-
       </div>
 
-      {/* ================= BOTTOM TABS ================= */}
+      {/* MOBILE TABS */}
       <MobileBottomTabs active={activeTab} onChange={setActiveTab} />
     </div>
   );
