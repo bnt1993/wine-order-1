@@ -12,12 +12,12 @@ export const useOrders = () => {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .order('created_at', { ascending: false }); // ✅ đúng tên cột
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      setOrders((data || []) as Order[]);
     } catch (err) {
-      console.error("Supabase fetch error:", err);
+      console.error('[Orders] fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -29,25 +29,32 @@ export const useOrders = () => {
 
   const createOrder = async (order: Order) => {
     try {
+      // Nếu bạn tự sinh id phía client thì có thể đẩy thẳng,
+      // còn nếu dùng default uuid của DB thì có thể bỏ id ở đây.
       const { error } = await supabase.from('orders').insert([
         {
           customer: order.customer,
           items: order.items,
-          total_price: order.total_price,        // ✅ snake_case
-          payment_method: order.payment_method, // ✅ snake_case
+          total_price: order.total_price,
+          payment_method: order.payment_method, // snake_case
           status: order.status,
         }
       ]);
-
       if (error) throw error;
 
+      // Tùy bạn: fetch lại hoặc thêm vào đầu danh sách:
+      // fetchOrders();
       setOrders(prev => [order, ...prev]);
     } catch (err) {
-      console.error("Supabase insert error:", err);
+      console.error('[Orders] insert error:', err);
     }
   };
 
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    // Optimistic update
+    const prevOrders = orders;
+    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
+
     try {
       const { error } = await supabase
         .from('orders')
@@ -55,16 +62,18 @@ export const useOrders = () => {
         .eq('id', orderId);
 
       if (error) throw error;
-
-      setOrders(prev =>
-        prev.map(o => o.id === orderId ? { ...o, status } : o)
-      );
+      // OK: giữ state như hiện tại
     } catch (err) {
-      console.error("Supabase update error:", err);
+      console.error('[Orders] update error:', err);
+      // Rollback khi lỗi
+      setOrders(prevOrders);
     }
   };
 
   const deleteOrder = async (orderId: string) => {
+    // Optimistic update
+    const prevOrders = orders;
+    setOrders(prev => prev.filter(o => o.id !== orderId));
     try {
       const { error } = await supabase
         .from('orders')
@@ -72,19 +81,20 @@ export const useOrders = () => {
         .eq('id', orderId);
 
       if (error) throw error;
-
-      setOrders(prev => prev.filter(o => o.id !== orderId));
     } catch (err) {
-      console.error("Supabase delete error:", err);
+      console.error('[Orders] delete error:', err);
+      // Rollback khi lỗi
+      setOrders(prevOrders);
     }
   };
 
-  return { 
-    orders, 
-    loading, 
-    fetchOrders, 
-    createOrder, 
-    updateOrderStatus, 
-    deleteOrder 
+  return {
+    orders,
+    loading,
+    fetchOrders,
+    createOrder,
+    updateOrderStatus,
+    deleteOrder,
   };
 };
+``
