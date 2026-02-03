@@ -169,74 +169,6 @@ export const exportOrdersToCSV = (orders: Order[]) => {
   a.click();
   URL.revokeObjectURL(url);
 };
-
-// ======================================================================
-// 🟦 EXPORT XLSX — ĐÃ SỬA (dynamic import JSZip để fix lỗi Vercel)
-// ======================================================================
-export const exportOrdersToXLSX = async (orders: Order[]) => {
-  const JSZip = (await import("jszip")).default; // 👈 FIX VERCEL
-
-  const { headers, rows } = makeOrderRows(orders);
-
-  const sheetData = [
-    `<row>${headers
-      .map((h) => `<c t="inlineStr"><is><t>${h}</t></is></c>`)
-      .join("")}</row>`,
-    ...rows.map(
-      (r) =>
-        `<row>${r
-          .map(
-            (v) =>
-              `<c t="inlineStr"><is><t>${String(v ?? "")}</t></is></c>`
-          )
-          .join("")}</row>`
-    ),
-  ].join("");
-
-  const sheetXML = `
-    <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-      <sheetData>${sheetData}</sheetData>
-    </worksheet>
-  `.trim();
-
-  const workbookXML = `
-    <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-              xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-      <sheets>
-        <sheet name="Orders" sheetId="1" r:id="rId1"/>
-      </sheets>
-    </workbook>
-  `.trim();
-
-  const relsXML = `
-    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId1" 
-        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"
-        Target="worksheets/sheet1.xml"/>
-    </Relationships>
-  `.trim();
-
-  const zip = new JSZip();
-  zip.file(
-   Default Extension="xml" ContentType="application/xml"/>
-        <Override PartName="/xl/workbook.xml" 
-          ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-        <Override PartName="/xl/worksheets/sheet1.xml" 
-          ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-      </Types>
-   book.xml.rels", relsXML);
-  xl.folder("worksheets")!.file("sheet1.xml", sheetXML);
-
-  const blob = await zip.generateAsync({ type: "blob" });
-
-  const ts = new Date().toISOString().slice(0, 10);
-  const a = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = `orders_${ts}.xlsx`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
 // ======================================================================
 // 🟦 ORDER CARD COMPONENT
 // ======================================================================
@@ -781,14 +713,6 @@ const AdminDashboard = ({
                     className="px-4 py-2 bg-white border border-stone-200 text-stone-600 rounded-xl text-[10px] font-black uppercase"
                   >
                     CSV
-                  </button>
-
-                  <button
-                    disabled={filteredOrders.length === 0}
-                    onClick={() => exportOrdersToXLSX(filteredOrders)}
-                    className="px-4 py-2 bg-brand-secondary text-white rounded-xl text-[10px] font-black uppercase"
-                  >
-                    Excel
                   </button>
                 </div>
               </div>
