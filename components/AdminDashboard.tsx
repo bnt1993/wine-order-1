@@ -355,7 +355,14 @@ const OrderCard = ({
           {new Date(order.created_at).toLocaleString("vi-VN", { hour12: false })}
         </span>
       </div>
-
+      <div className="mt-3">
+        <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">
+          Sản phẩm
+        </p>
+        <p className="text-xs font-black text-brand-secondary break-words">
+          {order.items.map(it => `${it.name} x${it.quantity}`).join(", ")}
+        </p>
+      </div>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Info label="Khách hàng" value={order.customer?.name || "—"} />
         <Info label="SĐT" value={order.customer?.phone || "—"} tel />
