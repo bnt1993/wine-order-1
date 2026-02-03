@@ -709,7 +709,7 @@ const AdminDashboard = ({
           {/* ===================== TAB: ORDERS ======================= */}
           {activeTab === "orders" && (
             <div className="space-y-6">
-
+          
               {/* Search mobile */}
               <div className="sm:hidden relative mb-3">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4" />
@@ -720,11 +720,11 @@ const AdminDashboard = ({
                   className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl text-xs font-bold"
                 />
               </div>
-
+          
               {/* Status filter */}
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                {(["all", "pending", "processing", "completed", "cancelled"] as const)
-                 .map((s) => (
+                {(["all", "pending", "processing", "completed", "cancelled"] as const).map(
+                  (s) => (
                     <button
                       key={s}
                       onClick={() => setOrderFilter(s)}
@@ -736,8 +736,114 @@ const AdminDashboard = ({
                     >
                       {s === "all" ? "Tất cả" : STATUS_META[s].label}
                     </button>
-                ))}
+                  )
+                )}
               </div>
+          
+              {/* Date filter */}
+              <div className="flex gap-2 mt-2">
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-white border border-stone-200 text-[10px] font-black uppercase"
+                />
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-white border border-stone-200 text-[10px] font-black uppercase"
+                />
+              </div>
+          
+              {/* Export */}
+              <div className="flex justify-between items-center mt-4">
+                <p className="text-[11px] text-stone-500 font-black uppercase">
+                  {filteredOrders.length} đơn phù hợp
+                </p>
+          
+                <div className="flex gap-2">
+                  <button
+                    disabled={filteredOrders.length === 0}
+                    onClick={() => exportOrdersToCSV(filteredOrders)}
+                    className="px-4 py-2 bg-white border border-stone-200 text-stone-600 rounded-xl text-[10px] font-black uppercase"
+                  >
+                    CSV
+                  </button>
+                </div>
+              </div>
+          
+              {/* ===================== BẢNG ĐƠN HÀNG ======================= */}
+          
+              <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
+                <table className="w-full text-left">
+                  <thead className="bg-stone-50 border-b">
+                    <tr>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">Mã đơn</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">Khách hàng</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">Sản phẩm</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">SĐT</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">Tổng tiền</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase">Trạng thái</th>
+                      <th className="px-4 py-3 text-xs font-bold text-stone-500 uppercase text-right">Hành động</th>
+                    </tr>
+                  </thead>
+          
+                  <tbody className="divide-y">
+                    {filteredOrders.map((o) => (
+                      <tr key={o.id} className="hover:bg-stone-50 transition">
+                        <td className="px-4 py-3 font-bold text-stone-700">#{o.id}</td>
+          
+                        <td className="px-4 py-3 text-sm text-stone-700">
+                          {o.customer?.name}
+                          <div className="text-xs text-stone-400">{new Date(o.created_at).toLocaleDateString('vi-VN')}</div>
+                        </td>
+          
+                        <td className="px-4 py-3 text-sm text-stone-700 max-w-xs truncate">
+                          {o.items.map(i => `${i.name} x${i.quantity}`).join(", ")}
+                        </td>
+          
+                        <td className="px-4 py-3 text-sm text-stone-700">{o.customer?.phone}</td>
+          
+                        <td className="px-4 py-3 text-sm font-bold text-brand-primary">
+                          {formatCurrency(o.total_price)}
+                        </td>
+          
+                        <td className="px-4 py-3">
+                          <StatusBadge status={o.status} />
+                        </td>
+          
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+          
+                            <select
+                              value={o.status}
+                              onChange={(e) => updateStatus(o.id, e.target.value as OrderStatus)}
+                              className="text-xs border rounded-lg px-2 py-1"
+                            >
+                              <option value="pending">Chờ duyệt</option>
+                              <option value="processing">Đang giao</option>
+                              <option value="completed">Hoàn tất</option>
+                              <option value="cancelled">Đã huỷ</option>
+                            </select>
+          
+                            <button
+                              onClick={() => deleteOrder(o.id)}
+                              className="px-3 py-1 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-lg"
+                            >
+                              Xoá
+                            </button>
+          
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+  </div>
+)}
 
               {/* Date filter */}
               <div className="flex gap-2 mt-2">
