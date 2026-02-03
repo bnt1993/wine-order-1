@@ -170,6 +170,61 @@ export const exportOrdersToCSV = (orders: Order[]) => {
   URL.revokeObjectURL(url);
 };
 // ======================================================================
+// 🟦 MOBILE BOTTOM TABS
+// ======================================================================
+const MobileBottomTabs = ({
+  active,
+  onChange,
+}: {
+  active: "stats" | "orders" | "products" | "customers";
+  onChange: (t: "stats" | "orders" | "products" | "customers") => void;
+}) => {
+  const tabs = [
+    { id: "stats", label: "Tổng quan", icon: BarChart3 },
+    { id: "orders", label: "Đơn hàng", icon: ShoppingCart },
+    { id: "products", label: "Sản phẩm", icon: Box },
+    { id: "customers", label: "Khách hàng", icon: Users },
+  ];
+
+  return (
+    <nav
+      className="
+        sm:hidden fixed left-0 right-0 bottom-0 z-[350]
+        bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70
+        border-t border-stone-200 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0)+10px)]
+      "
+    >
+      <ul className="grid grid-cols-4 gap-1">
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          const isActive = active === t.id;
+          return (
+            <li key={t.id}>
+              <button
+                onClick={() => onChange(t.id as any)}
+                className={`w-full flex flex-col items-center justify-center gap-1 py-2 rounded-xl ${
+                  isActive
+                    ? "text-brand-secondary bg-stone-100"
+                    : "text-stone-500 active:bg-stone-50"
+                }`}
+              >
+                <Icon
+                  className={`w-5 h-5 ${
+                    isActive ? "text-brand-accent" : ""
+                  }`}
+                />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {t.label}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+};
+// ======================================================================
 // 🟦 ORDER CARD COMPONENT
 // ======================================================================
 const OrderCard = ({
