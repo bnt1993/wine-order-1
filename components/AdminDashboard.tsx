@@ -191,9 +191,10 @@ export const exportOrdersToCSV = (orders: Order[]) => {
 // 🟦 EXPORT XLSX (NO XLSX LIB — 100% ZIP + XML)
 // ======================================================================
 export const exportOrdersToXLSX = async (orders: Order[]) => {
+  const JSZip = (await import("jszip")).default; // 👈 Lazy import — FIX Vercel
+
   const { headers, rows } = makeOrderRows(orders);
 
-  // Build sheet XML
   const sheetData = [
     `<row>${headers
       .map((h) => `<c t="inlineStr"><is><t>${h}</t></is></c>`)
@@ -201,7 +202,10 @@ export const exportOrdersToXLSX = async (orders: Order[]) => {
     ...rows.map(
       (r) =>
         `<row>${r
-          .map((v) => `<c t="inlineStr"><is><t>${String(v ?? "")}</t></is></c>`)
+          .map(
+            (v) =>
+              `<c t="inlineStr"><is><t>${String(v ?? "")}</t></is></c>`
+          )
           .join("")}</row>`
     ),
   ].join("");
@@ -218,26 +222,14 @@ export const exportOrdersToXLSX = async (orders: Order[]) => {
       <sheets>
         <sheet name="Orders" sheetId="1" r:id="rId1"/>
       </sheets>
-    </workbook>
-  `.trim();
-
-  const relsXML = `
-    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId1" 
-        Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"
-        Target="worksheets/sheet1.xml"/>
-    </Relationships>
-  `.trim();
-
-  const zip = new JSZip();
-  zip.file(
+   .file(
     "[Content_Types].xml",
     `
       <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
         <Default Extension="xml" ContentType="application/xml"/>
-        <Override PartName="/xl/workbook.xml" 
+        <Override PartName="/xl/workbook.xml"
           ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-        <Override PartName="/xl/worksheets/sheet1.xml" 
+        <Override PartName="/xl/worksheets/sheet1.xml"
           ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
       </Types>
     `.trim()
@@ -258,6 +250,7 @@ export const exportOrdersToXLSX = async (orders: Order[]) => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
 // ======================================================================
 // 🟦 MOBILE BOTTOM TABS
 // ======================================================================
@@ -354,15 +347,6 @@ const OrderCard = ({
         <span className="ml-auto text-stone-400 text-[10px] font-bold">
           {new Date(order.created_at).toLocaleString("vi-VN", { hour12: false })}
         </span>
-      </div>
-      <div className="mt-3">
-        <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">
-          Sản phẩm
-        </p>
-        <p className="text-xs font-black text-brand-secondary break-words">
-          {order.items.map(it => `${it.name} x${it.quantity}`).join(", ")}
-        </p>
-      </div>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Info label="Khách hàng" value={order.customer?.name || "—"} />
         <Info label="SĐT" value={order.customer?.phone || "—"} tel />
@@ -372,6 +356,14 @@ const OrderCard = ({
           value={formatCurrency(order.total_price)}
           emphasize
         />
+      </div>
+      <div className="mt-3">
+        <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">
+          Sản phẩm
+        </p>
+        <p className="text-xs font-black text-brand-secondary break-words">
+          {order.items.map(it => `${it.name} x${it.quantity}`).join(", ")}
+        </p>
       </div>
 
       {order.customer?.address && (
