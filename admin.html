@@ -2,15 +2,16 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hệ Thống Quản Trị | Rượu Ngâm Thanh Hà</title>
+
+  <!-- Nếu đang dùng Tailwind qua Vite/PostCSS, chỉ cần css build của bạn -->
   <link rel="stylesheet" href="/index.css" />
 </head>
-
-<body>
+<body class="bg-[#fcfaf7] text-[#2d1a12] font-sans">
   <div id="admin-root"></div>
 
-  <!-- Vite sẽ inject React 18 bundle đúng chuẩn -->
+  <!-- Quan trọng: CHỈ duy nhất entry của Vite cho trang admin -->
   <script type="module" src="/admin.tsx"></script>
 </body>
 </html>
