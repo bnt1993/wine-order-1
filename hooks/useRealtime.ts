@@ -1,22 +1,32 @@
-// hooks/useAdminAuth.ts
-import { useState } from "react";
+// hooks/useRealtime.ts
+import { useEffect } from "react";
+import { supabase } from "../services/supabase";
 
-export const useAdminAuth = () => {
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState("");
+/**
+ * Subscribe realtime cho nhiều bảng.
+ * Khi có thay đổi bất kỳ (INSERT/UPDATE/DELETE) → gọi onChange()
+ */
+export const useRealtime = (
+  tables: Array<"orders" | "products">,
+  onChange: () => void
+) => {
+  useEffect(() => {
+    // 1 channel dùng chung cho nhiều bảng
+    const channel = supabase.channel("admin-realtime");
 
-  const login = (password: string) => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setError("");
-      return true;
-    }
-    setError("Mật khẩu không chính xác");
-    return false;
-  };
+    tables.forEach((t) => {
+      channel.on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: t },
+        () => onChange()
+      );
+    });
 
-  const logout = () => setIsAuthenticated(false);
+    channel.subscribe();
 
-  return { isAuthenticated, error, login, logout };
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // Dùng join(",") để tránh re-subscribe liên tục do mảng tham chiếu thay đổi
+  }, [tables.join(","), onChange]);
 };
