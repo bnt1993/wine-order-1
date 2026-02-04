@@ -5,7 +5,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 // Import đúng theo cấu trúc của bạn
-import { AdminDashboardPremium } from "./components/admin/AdminDashboardPremium";
+import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { useOrders } from "./hooks/useOrders";
 import { useProducts } from "./hooks/useProducts";
 
@@ -37,7 +37,7 @@ const AppAdmin = () => {
   }, []);
 
   return (
-    <AdminDashboardPremium
+    <AdminDashboard
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       orders={orders}
