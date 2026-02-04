@@ -1,15 +1,17 @@
-// admin.tsx — Entry riêng cho Admin Panel (nằm ngoài /components, /hooks,...)
+// admin.tsx — chạy admin.html
 
-// React
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-// Import đúng theo cấu trúc của bạn
-import { AdminDashboard } from "./components/AdminDashboard";
+// Bạn không hề có thư mục /components/admin/
+// Bạn có sẵn file: /components/AdminDashboard.tsx
+import AdminDashboard from "./components/AdminDashboard";
+
+// Hooks dữ liệu Supabase đang nằm trong /hooks/
 import { useOrders } from "./hooks/useOrders";
 import { useProducts } from "./hooks/useProducts";
 
-// CSS global
+// Global CSS
 import "./index.css";
 
 const AppAdmin = () => {
@@ -44,7 +46,6 @@ const AppAdmin = () => {
       updateStatus={updateOrderStatus}
       deleteOrder={deleteOrder}
       products={products}
-      setProducts={() => {}}
       deleteProduct={deleteProduct}
       loading={loadingOrders || loadingProducts}
     />
