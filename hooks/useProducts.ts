@@ -1,39 +1,43 @@
-
-import { useState, useEffect } from 'react';
-import { Product } from '../types';
-import { PRODUCTS as INITIAL_PRODUCTS } from '../constants';
-import { supabase } from '../services/supabase';
+// hooks/useProducts.ts
+import { useState, useEffect } from "react";
+import { supabase } from "../services/supabase";
+import { Product } from "../types";
 
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchProducts = async () => {
-    if (!supabase) {
-      console.warn("Supabase: Chưa được cấu hình. Sử dụng dữ liệu sản phẩm mẫu.");
-      setProducts(INITIAL_PRODUCTS);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
-        setProducts(data);
-      } else {
-        // Nếu database trống, hiển thị dữ liệu mặc định
-        setProducts(INITIAL_PRODUCTS);
-      }
+      setProducts(
+        (data || []).map((row: any) => ({
+          id: row.id,
+          name: row.name,
+          category: row.category,
+          price: Number(row.price),
+          image: row.image,
+          description: row.description,
+          benefits: row.benefits,
+          badges: row.badges,
+          origin: row.origin,
+          volume: row.volume,
+          alcohol_content: row.alcohol_content,
+          aging_time: row.aging_time,
+          created_at: row.created_at,
+          stock: 0,        // bạn không có cột stock → set mặc định
+          status: "active" // bạn không có status → set mặc định
+        }))
+      );
     } catch (err) {
-      console.error("Supabase: Lỗi khi lấy dữ liệu sản phẩm:", err);
-      setProducts(INITIAL_PRODUCTS);
+      console.error("[Products] fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -43,30 +47,23 @@ export const useProducts = () => {
     fetchProducts();
   }, []);
 
-  const addProduct = async (product: Product) => {
-    if (!supabase) return;
-    try {
-      const { error } = await supabase.from('products').insert([product]);
-      if (error) throw error;
-      await fetchProducts();
-    } catch (err) {
-      console.error("Supabase: Lỗi khi thêm sản phẩm:", err);
-    }
-  };
-
   const deleteProduct = async (id: string) => {
-    if (!supabase) {
-      setProducts(prev => prev.filter(p => p.id !== id));
-      return;
-    }
+    const prev = products;
+    setProducts(p => p.filter(x => x.id !== id));
+
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
+      const { error } = await supabase.from("products").delete().eq("id", id);
       if (error) throw error;
-      await fetchProducts();
     } catch (err) {
-      console.error("Supabase: Lỗi khi xóa sản phẩm:", err);
+      console.error("[Products] delete error:", err);
+      setProducts(prev);
     }
   };
 
-  return { products, setProducts, loading, fetchProducts, addProduct, deleteProduct };
+  return {
+    products,
+    loading,
+    fetchProducts,
+    deleteProduct
+  };
 };
