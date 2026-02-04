@@ -5,7 +5,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 // Import đúng theo cấu trúc của bạn
-import { AdminDashboard } from "./components/admin/AdminDashboard";
+import { AdminDashboard } from "./components/AdminDashboard";
 import { useOrders } from "./hooks/useOrders";
 import { useProducts } from "./hooks/useProducts";
 
