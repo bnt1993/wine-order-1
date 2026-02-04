@@ -1,15 +1,15 @@
-// admin.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { AdminApp } from "./Admin/AdminApp";
+import { AdminApp } from "./Admin/AdminApp";   // Chú ý: 'A' hoa vì thư mục của bạn là Admin/
 import "./index.css";
 
-const container = document.getElementById("admin");
+// Debug: in version để chắc chắn chỉ có 1 bản React
+console.log("[admin] React version:", React.version);
+
+const container = document.getElementById("admin-root");
 if (!container) {
-  // Log rõ ràng giúp chẩn đoán production
-  // Có thể dùng alert nếu bạn muốn biết ngay trên Vercel
   throw new Error(
-    "[Admin] Không tìm thấy #admin trong admin.html. Kiểm tra admin.html và đường dẫn <script type='module' src='/admin.tsx'>"
+    "[Admin] Không tìm thấy #admin-root trong admin.html. Kiểm tra lại admin.html & đường dẫn /admin.tsx."
   );
 }
 
