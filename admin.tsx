@@ -1,16 +1,16 @@
-// src/admin.tsx
+// admin.tsx — Entry riêng cho Admin Panel (nằm ngoài /src)
+
+// React
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-// Dashboard giao diện Premium
-import { AdminDashboardPremium } from "./components/admin/AdminDashboardPremium";
+// Import vào từ src/
+import { AdminDashboardPremium } from "./src/components/admin/AdminDashboardPremium";
+import { useOrders } from "./src/hooks/useOrders";
+import { useProducts } from "./src/hooks/useProducts";
 
-// Hooks Supabase
-import { useOrders } from "./hooks/useOrders";
-import { useProducts } from "./hooks/useProducts";
-
-// CSS
-import "./index.css";
+// CSS global (nằm trong src)
+import "./src/index.css";
 
 const AppAdmin = () => {
   const {
@@ -31,7 +31,6 @@ const AppAdmin = () => {
 
   const [isOpen, setIsOpen] = React.useState(true);
 
-  // Khi admin mở dashboard -> load lại dữ liệu
   React.useEffect(() => {
     fetchOrders();
     fetchProducts();
@@ -52,6 +51,7 @@ const AppAdmin = () => {
   );
 };
 
+// Mount vào admin.html
 ReactDOM.createRoot(document.getElementById("admin")!).render(
   <React.StrictMode>
     <AppAdmin />
