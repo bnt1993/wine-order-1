@@ -1,20 +1,18 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { AdminApp } from "./admin/AdminApp";   // Chú ý: 'A' hoa vì thư mục của bạn là Admin/
-import "./index.css";
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ Thống Quản Trị | Rượu Ngâm Thanh Hà</title>
 
-// Debug: in version để chắc chắn chỉ có 1 bản React
-console.log("[admin] React version:", React.version);
+  <!-- Load CSS do Vite build -->
+  <link rel="stylesheet" href="/index.css" />
+</head>
 
-const container = document.getElementById("admin-root");
-if (!container) {
-  throw new Error(
-    "[Admin] Không tìm thấy #admin-root trong admin.html. Kiểm tra lại admin.html & đường dẫn /admin.tsx."
-  );
-}
+<body class="bg-brand-soft text-brand-secondary font-sans">
+  <div id="admin-root"></div>
 
-ReactDOM.createRoot(container).render(
-  <React.StrictMode>
-    <AdminApp />
-  </React.StrictMode>
-);
+  <!-- Entry Vite -->
+  <script type="module" src="/admin.tsx"></script>
+</body>
+</html>
