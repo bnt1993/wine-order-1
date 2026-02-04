@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Order, OrderStatus } from '../types';
-import { supabase } from '../services/supabase';
+// hooks/useOrders.ts
+import { useState, useEffect } from "react";
+import { supabase } from "../services/supabase";
+import { Order, OrderStatus } from "../types";
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -10,14 +11,25 @@ export const useOrders = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrders((data || []) as Order[]);
+
+      setOrders(
+        (data || []).map((row: any) => ({
+          id: row.id,
+          created_at: row.created_at,
+          status: row.status,
+          payment_method: row.payment_method,
+          total_price: Number(row.total_price),
+          customer: row.customer,   // JSONB
+          items: row.items          // JSONB
+        }))
+      );
     } catch (err) {
-      console.error('[Orders] fetch error:', err);
+      console.error("[Orders] fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -27,64 +39,33 @@ export const useOrders = () => {
     fetchOrders();
   }, []);
 
-  const createOrder = async (order: Order) => {
-    try {
-      // Nếu bạn tự sinh id phía client thì có thể đẩy thẳng,
-      // còn nếu dùng default uuid của DB thì có thể bỏ id ở đây.
-      const { error } = await supabase.from('orders').insert([
-        {
-          customer: order.customer,
-          items: order.items,
-          total_price: order.total_price,
-          payment_method: order.payment_method, // snake_case
-          status: order.status,
-        }
-      ]);
-      if (error) throw error;
-
-      // Tùy bạn: fetch lại hoặc thêm vào đầu danh sách:
-      // fetchOrders();
-      setOrders(prev => [order, ...prev]);
-    } catch (err) {
-      console.error('[Orders] insert error:', err);
-    }
-  };
-
-  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
-    // Optimistic update
-    const prevOrders = orders;
-    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
+  // UPDATE STATUS
+  const updateOrderStatus = async (id: number, status: OrderStatus) => {
+    const prev = orders;
+    setOrders(prev => prev.map(o => (o.id === id ? { ...o, status } : o)));
 
     try {
       const { error } = await supabase
-        .from('orders')
+        .from("orders")
         .update({ status })
-        .eq('id', orderId);
-
+        .eq("id", id);
       if (error) throw error;
-      // OK: giữ state như hiện tại
     } catch (err) {
-      console.error('[Orders] update error:', err);
-      // Rollback khi lỗi
-      setOrders(prevOrders);
+      console.error("[Orders] update error:", err);
+      setOrders(prev);
     }
   };
 
-  const deleteOrder = async (orderId: string) => {
-    // Optimistic update
-    const prevOrders = orders;
-    setOrders(prev => prev.filter(o => o.id !== orderId));
+  // DELETE ORDER
+  const deleteOrder = async (id: number) => {
+    const prev = orders;
+    setOrders(prev => prev.filter(o => o.id !== id));
     try {
-      const { error } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', orderId);
-
+      const { error } = await supabase.from("orders").delete().eq("id", id);
       if (error) throw error;
     } catch (err) {
-      console.error('[Orders] delete error:', err);
-      // Rollback khi lỗi
-      setOrders(prevOrders);
+      console.error("[Orders] delete error:", err);
+      setOrders(prev);
     }
   };
 
@@ -92,9 +73,7 @@ export const useOrders = () => {
     orders,
     loading,
     fetchOrders,
-    createOrder,
     updateOrderStatus,
     deleteOrder,
   };
 };
-``
