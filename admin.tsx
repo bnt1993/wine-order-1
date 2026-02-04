@@ -1,16 +1,16 @@
-// admin.tsx — Entry riêng cho Admin Panel (nằm ngoài /src)
+// admin.tsx — Entry riêng cho Admin Panel (nằm ngoài /components, /hooks,...)
 
 // React
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-// Import vào từ src/
-import { AdminDashboardPremium } from "./src/components/admin/AdminDashboardPremium";
-import { useOrders } from "./src/hooks/useOrders";
-import { useProducts } from "./src/hooks/useProducts";
+// Import đúng theo cấu trúc của bạn
+import { AdminDashboardPremium } from "./components/admin/AdminDashboardPremium";
+import { useOrders } from "./hooks/useOrders";
+import { useProducts } from "./hooks/useProducts";
 
-// CSS global (nằm trong src)
-import "./src/index.css";
+// CSS global
+import "./index.css";
 
 const AppAdmin = () => {
   const {
