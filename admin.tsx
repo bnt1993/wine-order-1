@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { AdminApp } from "./Admin/AdminApp";   // Chú ý: 'A' hoa vì thư mục của bạn là Admin/
+import { AdminApp } from "./admin/AdminApp";   // Chú ý: 'A' hoa vì thư mục của bạn là Admin/
 import "./index.css";
 
 // Debug: in version để chắc chắn chỉ có 1 bản React
