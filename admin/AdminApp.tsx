@@ -1,41 +1,31 @@
-// admin/AdminApp.tsx
 import React from "react";
+import { AdminProvider, useAdmin } from "./useAdminEnterprise";
 import AdminDashboard from "../components/AdminDashboard";
-import { AdminProvider, useAdmin } from "./AdminProvider";
 
 const AdminShell = () => {
-  const {
-    orders, products, customers, stats,
-    updateOrderStatus, deleteOrder,
-    addProduct, updateProduct, deleteProduct,
-    exportData, refreshAll,
-    loading
-  } = useAdmin();
-
-  const [isOpen, setIsOpen] = React.useState(true);
+  const admin = useAdmin();
 
   return (
     <AdminDashboard
-      isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
-      orders={orders}
-      products={products}
-      customers={customers}
-      stats={stats}
-      onUpdateOrderStatus={updateOrderStatus}
-      onDeleteOrder={deleteOrder}
-      onAddProduct={addProduct}
-      onUpdateProduct={updateProduct}
-      onDeleteProduct={deleteProduct}
-      onExportData={exportData}
-      onRefreshData={refreshAll}
-      // Lưu ý: AdminDashboard của bạn có UI login sẵn.
+      orders={admin.orders}
+      products={admin.products}
+      customers={admin.customers}
+      stats={admin.stats}
+      loading={admin.loading}
+      onRefresh={admin.refreshAll}
+      onUpdateOrderStatus={admin.updateOrderStatus}
+      onDeleteOrder={admin.deleteOrder}
+      onAddProduct={admin.addProduct}
+      onUpdateProduct={admin.updateProduct}
+      onDeleteProduct={admin.deleteProduct}
     />
   );
 };
 
-export const AdminApp = () => (
-  <AdminProvider>
-    <AdminShell />
-  </AdminProvider>
-);
+export const AdminApp = () => {
+  return (
+    <AdminProvider>
+      <AdminShell />
+    </AdminProvider>
+  );
+};
